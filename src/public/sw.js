@@ -1,0 +1,91 @@
+const CACHE_NAME = 'story-app-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/styles/styles.css',
+  '/scripts/main.js',
+  '/favicon.png',
+  '/images/logo.png',    
+];
+
+// Install dan cache static assets
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const url of urlsToCache) {
+        try {
+          await cache.add(url);
+          console.log(`Cached: ${url}`);
+        } catch (err) {
+          console.error(`Gagal cache: ${url}`, err);
+        }
+      }
+    })
+  );
+});
+
+// Fetch event handler
+self.addEventListener('fetch', (event) => {
+  const requestUrl = new URL(event.request.url);
+
+  // Network first untuk API stories
+  if (requestUrl.origin === location.origin && requestUrl.pathname.startsWith('/v1/stories')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        try {
+          const response = await fetch(event.request);
+          cache.put(event.request, response.clone());
+          return response;
+        } catch (error) {
+          const cachedResponse = await cache.match(event.request);
+          return cachedResponse || new Response('Offline', { status: 503, statusText: 'Offline' });
+        }
+      })
+    );
+    return;
+  }
+
+  // Cache first untuk static assets lainnya
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
+  );
+});
+
+// Activate event untuk bersihkan cache lama
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(names =>
+      Promise.all(names.map(name => {
+        if (!cacheWhitelist.includes(name)) {
+          return caches.delete(name);
+        }
+      }))
+    )
+  );
+});
+
+// Push notification event
+self.addEventListener('push', (event) => {
+  let data = {
+    title: 'Story Baru!',
+    options: {
+      body: 'Ada story baru yang dibuat.',
+      icon: '/images/logo.png',  // pakai logo.png yang ada
+      badge: '/images/logo.png', // pakai logo.png yang sama sebagai badge
+    },
+  };
+
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data.options.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, data.options)
+  );
+});
