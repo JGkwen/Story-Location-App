@@ -22,7 +22,6 @@ async function subscribeUserToPush(registration) {
   }
 
   try {
-    // Minta izin notifikasi jika belum ada
     if (Notification.permission === 'default') {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
@@ -31,10 +30,8 @@ async function subscribeUserToPush(registration) {
       }
     }
 
-    // Cek apakah sudah subscribe
     let subscription = await registration.pushManager.getSubscription();
 
-    // Jika belum, subscribe baru
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -42,13 +39,11 @@ async function subscribeUserToPush(registration) {
       });
     }
 
-    // Pastikan keys tersedia
     if (!subscription.getKey) {
       console.error('Subscription keys tidak ada, abort subscribe ke server');
       return;
     }
 
-    // Fungsi konversi ArrayBuffer ke Base64 string
     function arrayBufferToBase64(buffer) {
       let binary = '';
       const bytes = new Uint8Array(buffer);
@@ -64,14 +59,12 @@ async function subscribeUserToPush(registration) {
       return;
     }
 
-    // Ambil token user (pastikan user sudah login)
     const token = localStorage.getItem('auth_token');
     if (!token) {
       console.log('User belum login, tidak bisa subscribe push');
       return;
     }
 
-    // Bentuk payload sesuai API yang diminta
     const cleanSubscription = {
       endpoint: subscription.endpoint,
       keys: {
@@ -80,7 +73,6 @@ async function subscribeUserToPush(registration) {
       },
     };
 
-    // Kirim ke server
     console.log('Payload subscription yang dikirim:', cleanSubscription);
 
     const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
@@ -104,8 +96,6 @@ async function subscribeUserToPush(registration) {
     console.error('Error subscribe push:', error);
   }
 }
-
-
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

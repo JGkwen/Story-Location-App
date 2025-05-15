@@ -24,7 +24,6 @@ export default class HomePresenter {
       this.#view.showStories(stories);
       this.#view.hideLoading();
 
-      // Inisialisasi peta
       if (typeof Map?.init === 'function') {
         Map.init(this.#mapElement, stories);
       } else {

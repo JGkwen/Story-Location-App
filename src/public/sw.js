@@ -9,7 +9,6 @@ const urlsToCache = [
   '/images/logo.png',    
 ];
 
-// Install dan cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -25,11 +24,9 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event handler
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Network first untuk API stories
   if (requestUrl.origin === location.origin && requestUrl.pathname.startsWith('/v1/stories')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
@@ -46,13 +43,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache first untuk static assets lainnya
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
   );
 });
 
-// Activate event untuk bersihkan cache lama
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -66,14 +61,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Push notification event
 self.addEventListener('push', (event) => {
   let data = {
     title: 'Story Baru!',
     options: {
       body: 'Ada story baru yang dibuat.',
-      icon: '/images/logo.png',  // pakai logo.png yang ada
-      badge: '/images/logo.png', // pakai logo.png yang sama sebagai badge
+      icon: '/images/logo.png',  
+      badge: '/images/logo.png', 
     },
   };
 
