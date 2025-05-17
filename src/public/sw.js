@@ -3,8 +3,8 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/styles/styles.css',
-  '/scripts/main.js',
+  '/app.css',  
+  '/app.bundle.js',  
   '/favicon.png',
   '/images/logo.png',    
 ];
@@ -27,6 +27,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
+  // Menggunakan NetworkFirst untuk API Stories
   if (requestUrl.origin === location.origin && requestUrl.pathname.startsWith('/v1/stories')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
@@ -43,6 +44,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Cache First untuk file statis
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
   );
@@ -61,12 +63,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Push notification event
 self.addEventListener('push', (event) => {
   let data = {
     title: 'Story Baru!',
     options: {
       body: 'Ada story baru yang dibuat.',
-      icon: '/images/logo.png',  
+      icon: '/images/logo.png',
       badge: '/images/logo.png', 
     },
   };
@@ -79,7 +82,44 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  sendPushSubscriptionToBackend(event);
+
   event.waitUntil(
     self.registration.showNotification(data.title, data.options)
   );
 });
+
+async function sendPushSubscriptionToBackend(event) {
+  const subscription = await self.registration.pushManager.getSubscription();
+  if (!subscription) return;
+
+  const token = localStorage.getItem('auth_token');
+  if (!token) return;
+
+  const subscriptionPayload = {
+    endpoint: subscription.endpoint,
+    keys: {
+      p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
+      auth: arrayBufferToBase64(subscription.getKey('auth')),
+    }
+  };
+
+  const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(subscriptionPayload),
+  });
+
+  const result = await response.json();
+  console.log('Push Subscription Sent:', result);
+}
+
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  bytes.forEach((b) => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
