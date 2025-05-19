@@ -53,8 +53,16 @@ export default class HomePage {
         <h3>${story.name}</h3>
         <p>${story.description}</p>
         <p><small>${new Date(story.createdAt).toLocaleString()}</small></p>
+        <button class="btn-save-draft" data-id="${story.id}">Simpan ke Draft</button>
       `;
       storyList.appendChild(item);
+    });
+
+    storyList.querySelectorAll('.btn-save-draft').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.dataset.id;
+        this.#presenter.saveStoryToDraft(id);
+      });
     });
   }
 

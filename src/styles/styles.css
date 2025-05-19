@@ -148,19 +148,166 @@ h2, h3 {
   padding: 0;
 }
 
+#story-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
 .story-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 0;
-  border-bottom: 1px solid #ddd;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.story-item:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .story-item img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.story-item h3 {
+  font-size: 1.25rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.story-item p {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.story-item button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.story-item button:hover {
+  background-color: var(--secondary-color);
+}
+
+.save-draft-btn-container {
+  display: flex;
+  justify-content: center;  
+  margin-top: 16px;  
+}
+
+.save-draft-btn-container button {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.save-draft-btn-container button:hover {
+  background-color: var(--secondary-color);
+}
+
+.draft-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.draft-list li {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.draft-list li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.draft-list img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.draft-list h3 {
+  font-size: 1.25rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.draft-list p {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.draft-list button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.draft-list button:hover {
+  background-color: var(--secondary-color);
+}
+
+.draft-item {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  gap: 16px;
+}
+
+.draft-item img {
   width: 100px;
   height: 100px;
   object-fit: cover;
   border-radius: 8px;
+}
+
+.draft-item button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.draft-item button:hover {
+  background-color: var(--secondary-color);
 }
 
 form input, form textarea {
@@ -250,5 +397,11 @@ button:hover {
 
   .main-content {
     margin-left: 0;
+  }
+  #story-list {
+    grid-template-columns: 1fr;  
+  }
+  .draft-list {
+    grid-template-columns: 1fr;  
   }
 }

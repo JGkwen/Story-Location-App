@@ -33,7 +33,7 @@ class App {
   }
 
   async renderPage() {
-    const url = getActiveRoute();
+    const url = getActiveRoute();  
     const token = localStorage.getItem('auth_token');
 
     if (!token && url !== '/login' && url !== '/register') {
@@ -41,15 +41,20 @@ class App {
       return;
     }
 
-    const PageClass = routes[url] || routes['/'];
+    let page;
+
+    if (url === '/drafts') {
+      const DraftsPage = (await import('../pages/drafts/drafts-page.js')).default;
+      page = new DraftsPage();
+    } else {
+      const PageClass = routes[url] || routes['/'];
+      page = new PageClass();
+    }
 
     try {
-      const page = new PageClass();
-
-      ViewTransition.start(async () => {
+      await ViewTransition.start(async () => {
         this.#content.innerHTML = await page.render();
         await page.afterRender();
-
         this.#content.classList.add('show');
       });
     } catch (error) {

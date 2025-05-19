@@ -8,21 +8,27 @@ module.exports = merge(common, {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-        ],
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
   devServer: {
     static: path.resolve(__dirname, 'dist'),
     port: 9000,
+    historyApiFallback: true,
     client: {
       overlay: {
         errors: true,
         warnings: true,
       },
     },
+    proxy: [
+      {
+        context: ['/v1'],
+        target: 'https://story-api.dicoding.dev',
+        changeOrigin: true,
+        secure: false,
+      },
+    ],
   },
 });

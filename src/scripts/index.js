@@ -9,7 +9,7 @@ function urlBase64ToUint8Array(base64String) {
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
-  for(let i=0; i<rawData.length; ++i) {
+  for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
@@ -31,7 +31,6 @@ async function subscribeUserToPush(registration) {
     }
 
     let subscription = await registration.pushManager.getSubscription();
-
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -53,7 +52,6 @@ async function subscribeUserToPush(registration) {
 
     const p256dh = subscription.getKey('p256dh');
     const auth = subscription.getKey('auth');
-
     if (!p256dh || !auth) {
       console.error('Subscription keys tidak ada atau kosong, abort subscribe ke server');
       return;
@@ -75,7 +73,7 @@ async function subscribeUserToPush(registration) {
 
     console.log('Payload subscription yang dikirim:', cleanSubscription);
 
-    const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
+    const response = await fetch('/v1/notifications/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,6 +95,41 @@ async function subscribeUserToPush(registration) {
   }
 }
 
+async function doLogin(username, password) {
+  const res = await fetch('/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  const { token } = await res.json();
+  return token;
+}
+
+const loginForm = document.querySelector('#login-form');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(loginForm);
+    const username = formData.get('username');
+    const password = formData.get('password');
+
+    try {
+      const token = await doLogin(username, password);
+      if (!token) throw new Error('Token tidak diterima');
+      localStorage.setItem('auth_token', token);
+
+      const registration = await navigator.serviceWorker.ready;
+      await subscribeUserToPush(registration);
+
+      window.location.hash = '/home';
+    } catch (err) {
+      console.error('Login gagal:', err);
+      alert('Login gagal, cek kembali username/password.');
+    }
+  });
+}
+
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -115,9 +148,7 @@ if ('serviceWorker' in navigator) {
           });
         }
       })
-      .catch(err => {
-        console.error('Registrasi Service Worker gagal:', err);
-    });
+      .catch(err => console.error('Registrasi Service Worker gagal:', err));
   });
 }
 
@@ -129,20 +160,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await app.renderPage();
+
   const skipLink = document.querySelector('.skip-to-content');
   const mainContent = document.querySelector('#main-content');
-
   skipLink.addEventListener('click', function (event) {
-    event.preventDefault(); 
-    skipLink.blur(); 
-
-    location.hash = '/home'; 
-    mainContent.focus(); 
-    mainContent.scrollIntoView(); 
+    event.preventDefault();
+    skipLink.blur();
+    location.hash = '/home';
+    mainContent.focus();
+    mainContent.scrollIntoView();
   });
 
   window.addEventListener('hashchange', async () => {
     await app.renderPage();
-    Camera.stopAllStreams(); 
+    Camera.stopAllStreams();
   });
 });
