@@ -22,13 +22,5 @@ module.exports = merge(common, {
         warnings: true,
       },
     },
-    proxy: [
-      {
-        context: ['/v1'],
-        target: 'https://story-api.dicoding.dev',
-        changeOrigin: true,
-        secure: false,
-      },
-    ],
   },
 });
