@@ -1,6 +1,7 @@
 import '../styles/styles.css';
 import App from './pages/app';
 import Camera from './utils/camera'; 
+import CONFIG from '../scripts/config'; 
 
 const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
 
@@ -73,7 +74,7 @@ async function subscribeUserToPush(registration) {
 
     console.log('Payload subscription yang dikirim:', cleanSubscription);
 
-    const response = await fetch('/v1/notifications/subscribe', {
+    const response = await fetch(`${CONFIG.BASE_URL}/notifications/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ async function subscribeUserToPush(registration) {
 }
 
 async function doLogin(username, password) {
-  const res = await fetch('/v1/auth/login', {
+  const res = await fetch(`${CONFIG.BASE_URL.replace(/\/v1$/, '')}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
